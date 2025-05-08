@@ -1,5 +1,12 @@
+
+
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.9' // Sử dụng image Docker có sẵn Python
+            args '-v /var/run/docker.sock:/var/run/docker.sock' // Kết nối Docker socket nếu cần
+        }
+    }
     
     stages {
         stage('Checkout') {
@@ -9,44 +16,34 @@ pipeline {
             }
         }
         
-        stage('Validate HTML') {
+        stage('Setup Environment') {
             steps {
-                // Kiểm tra xem file index.html có tồn tại
-                sh 'ls -la'
-                sh 'test -f index.html || (echo "index.html not found" && exit 1)'
-            }
-        }
-        
-        stage('Deploy to Web Server') {
-            steps {
-                // Triển khai file index.html đến web server
-                // Đây là ví dụ sử dụng thư mục web server local
-                sh 'mkdir -p /var/www/html/ || true'
-                sh 'cp index.html /var/www/html/'
+                // Kiểm tra phiên bản Python
+                sh 'python --version'
                 
-                // Hoặc bạn có thể sử dụng các plugin như SSH, FTP để triển khai lên server khác
-                // sshPublisher(publishers: [
-                //     sshPublisherDesc(
-                //         configName: 'myWebServer',
-                //         transfers: [sshTransfer(sourceFiles: 'index.html', remoteDirectory: '/var/www/html/')],
-                //         verbose: true
-                //     )
-                // ])
+                // Cài đặt các dependencies nếu cần
+                // Uncomment dòng dưới nếu bạn có file requirements.txt
+                // sh 'pip install -r requirements.txt'
             }
         }
         
-        stage('Verify Deployment') {
+        stage('Run Python Script') {
             steps {
-                // Kiểm tra xem file đã được triển khai
-                sh 'test -f /var/www/html/index.html || (echo "Deployment failed" && exit 1)'
-                echo 'Deployment successful!'
+                // Chạy file Python
+                sh 'python hello.py'
             }
         }
     }
     
     post {
-        always{
-            mail bcc: '', body: ' xin chao cac ban', cc: 'thien.210213@tbd.edu.vn', from: '', replyTo: '', subject: 'Hello', to: 'phanthothien204@gmail.com'
+        success {
+            echo 'Python script executed successfully!'
+        }
+        failure {
+            echo 'Failed to execute Python script'
+        }
+        always {
+            echo 'Pipeline completed'
         }
     }
 }
