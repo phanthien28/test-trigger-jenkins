@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Clone') {
             steps {
-                git 'https://github.com/phanthien28/test-trigger-jenkins.git'
+                git branch: 'main', 'https://github.com/phanthien28/test-trigger-jenkins.git'
             }
         }
     }
