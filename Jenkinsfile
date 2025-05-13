@@ -8,7 +8,6 @@ pipeline {
             }
         }
 
-        
         stage('Run Child Job') {
             steps {
                 build job: 'run-job-child', parameters: [string(name: 'STATUS_MESSAGE', value: 'run success')]
